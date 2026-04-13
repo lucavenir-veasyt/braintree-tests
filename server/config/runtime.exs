@@ -21,8 +21,9 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :braintree_tests, :braintree,
-  public_key: System.fetch_env!("TODO_BRAINTREE_PUBLIC_KEY"),
-  private_key: System.fetch_env!("TODO_BRAINTREE_PRIVATE_KEY")
+  merchant_id: System.fetch_env!("BRAINTREE_MERCHANT_ID"),
+  public_key: System.fetch_env!("BRAINTREE_PUBLIC_KEY"),
+  private_key: System.fetch_env!("BRAINTREE_PRIVATE_KEY")
 
 if config_env() == :prod do
   database_url =
