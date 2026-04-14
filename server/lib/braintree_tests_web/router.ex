@@ -20,10 +20,12 @@ defmodule BraintreeTestsWeb.Router do
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", BraintreeTestsWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", BraintreeTestsWeb do
+    pipe_through :api
+
+    get "/braintree/token", BraintreeController, :generate_client_token
+    post "/braintree/charge", BraintreeController, :charge_with_nonce
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:braintree_tests, :dev_routes) do
