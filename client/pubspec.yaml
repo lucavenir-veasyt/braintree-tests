@@ -1,5 +1,5 @@
 name: braintree_tests
-description: "a braintree sandbox project"
+description: "a payment integration sandbox project"
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -8,9 +8,40 @@ environment:
   flutter: ^3.41.4
 
 dependencies:
+  archive: ^4.0.9
+  calendar_date_picker2: ^2.0.1
+  clock: ^1.1.2
+  collection: ^1.19.1
+  cupertino_icons: ^1.0.9
+  dio: ^5.9.2
+  fast_immutable_collections: ^11.1.0
+  fl_chart: ^1.2.0
   flutter:
     sdk: flutter
+  flutter_riverpod: ^3.3.1
+  flutter_secure_storage: ^10.0.0
+  freezed_annotation: ^3.1.0
+  go_router: ^17.2.1
+  google_fonts: ^8.0.2
+  http: ^1.6.0
+  intl: ^0.20.2
+  json_annotation: ^4.11.0
+  meta: ^1.17.0
+  pdf: ^3.12.0
+  reactive_forms: ^18.2.2
+  retrofit: ^4.9.2
+  riverpod_annotation: ^4.0.2
+  riverpod_swiss_knife: ^0.0.5
+  shared_preferences: ^2.5.5
+  shimmer: ^3.0.0
+  talker_dio_logger: ^5.1.16
+  talker_flutter: ^5.1.16
+  talker_riverpod_logger: ^5.1.16
+  time: ^2.1.6
+  two_dimensional_scrollables: ^0.4.2
+  url_launcher: ^6.3.2
   very_good_analysis: ^10.2.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
