@@ -25,6 +25,8 @@ defmodule BraintreeTestsWeb.Router do
 
     get "/braintree/token", BraintreeController, :generate_client_token
     post "/braintree/charge", BraintreeController, :charge_with_nonce
+
+    post "/stripe/payment", StripeController, :payment
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

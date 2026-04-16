@@ -25,6 +25,10 @@ config :braintree_tests, :braintree,
   public_key: System.fetch_env!("BRAINTREE_PUBLIC_KEY"),
   private_key: System.fetch_env!("BRAINTREE_PRIVATE_KEY")
 
+config :braintree_tests, :stripe,
+  api_key: System.fetch_env!("STRIPE_API_KEY"),
+  webhook_secret: System.fetch_env!("STRIPE_WEBHOOK_SECRET")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
