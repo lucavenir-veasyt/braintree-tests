@@ -5,6 +5,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+println("Current Flutter min SDK is: ${flutter.minSdkVersion}")
+
 android {
     namespace = "com.veasyt.braintree_tests"
     compileSdk = flutter.compileSdkVersion
