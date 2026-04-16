@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "checkout.dart";
+
 void main() {
   runApp(
     const ProviderScope(
@@ -15,11 +17,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text("Hello World!"),
-        ),
-      ),
+      home: CheckoutScreen(),
     );
   }
 }
