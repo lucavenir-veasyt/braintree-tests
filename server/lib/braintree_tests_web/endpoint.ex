@@ -47,6 +47,7 @@ defmodule BraintreeTestsWeb.Endpoint do
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 
+  plug Corsica, origins: "*", allow_headers: ["content-type"]
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options

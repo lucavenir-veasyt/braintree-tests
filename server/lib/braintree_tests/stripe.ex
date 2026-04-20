@@ -8,7 +8,8 @@ defmodule BraintreeTests.Stripe do
         auth: {:basic, "#{api_key()}:"},
         form: %{
           "amount" => amount,
-          "currency" => "EUR"
+          "currency" => "EUR",
+          "payment_method_types[]" => "card"
         }
       )
 
@@ -26,6 +27,6 @@ defmodule BraintreeTests.Stripe do
   def api_key() do
     :braintree_tests
     |> Application.fetch_env!(:stripe)
-    |> Keyword.fetch!(:api_key)
+    |> Keyword.fetch!(:secret_key)
   end
 end

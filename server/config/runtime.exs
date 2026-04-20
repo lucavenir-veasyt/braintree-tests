@@ -26,7 +26,7 @@ config :braintree_tests, :braintree,
   private_key: System.fetch_env!("BRAINTREE_PRIVATE_KEY")
 
 config :braintree_tests, :stripe,
-  api_key: System.fetch_env!("STRIPE_API_KEY"),
+  secret_key: System.fetch_env!("STRIPE_SECRET_KEY"),
   webhook_secret: System.fetch_env!("STRIPE_WEBHOOK_SECRET")
 
 if config_env() == :prod do

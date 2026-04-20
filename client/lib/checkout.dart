@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:developer";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_stripe/flutter_stripe.dart";
@@ -40,11 +41,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
     } on StripeException catch (e) {
       if (kDebugMode) {
-        print("stripe exception: $e");
+        log("stripe exception: $e");
+      }
+    } on http.ClientException catch (e) {
+      if (kDebugMode) {
+        log("client exception: $e");
+        log("client exception message: ${e.message}");
+        log("client exception uri: ${e.uri}");
+      }
+    } on StripeConfigException catch (e) {
+      if (kDebugMode) {
+        log("stripe config exception: $e");
+        log("stripe config exception message: ${e.message}");
       }
     } on Exception catch (e) {
       if (kDebugMode) {
-        print("other exception: $e");
+        log("other exception: $e");
       }
     }
   }
