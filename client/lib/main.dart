@@ -1,5 +1,5 @@
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:flutter_localizations/flutter_localizations.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_stripe/flutter_stripe.dart";
 
@@ -24,16 +24,17 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: kIsWeb
-          ? const CheckoutScreen()
-          : switch (defaultTargetPlatform) {
-              .android => const CheckoutScreen(),
-              .iOS => const CheckoutScreen(),
-              final platform => throw UnsupportedError(
-                "we do not support $platform yet",
-              ),
-            },
+    return const MaterialApp(
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        Locale("it"),
+        Locale("en"),
+      ],
+      home: CheckoutScreen(),
     );
   }
 }
