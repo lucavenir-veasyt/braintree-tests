@@ -2,6 +2,8 @@
 # the configuration should be available into https://sandbox.braintreegateway.com/
 # (yes we're just using the sandbox environment for now - but it'll be pretty similar in production)
 [env]
-BRAINTREE_MERCHANT_ID = "your merch id"
-BRAINTREE_PUBLIC_KEY = "your public key"
-BRAINTREE_PRIVATE_KEY = "your private key"
+BRAINTREE_MERCHANT_ID = "..."
+BRAINTREE_PUBLIC_KEY = "..."
+BRAINTREE_PRIVATE_KEY = "..."
+STRIPE_SECRET_KEY = "..."
+STRIPE_WEBHOOK_SECRET = "..."
