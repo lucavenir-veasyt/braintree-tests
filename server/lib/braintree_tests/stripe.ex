@@ -13,9 +13,13 @@ defmodule BraintreeTests.Stripe do
         }
       )
 
-    %{
-      "client_secret" => response.body["client_secret"]
-    }
+    case response.body do
+      %{"client_secret" => secret} when not is_nil(secret) ->
+        %{"client_secret" => secret}
+
+      anything ->
+        raise "Stripe error: #{inspect(anything)}"
+    end
   end
 
   def webhook_secret() do

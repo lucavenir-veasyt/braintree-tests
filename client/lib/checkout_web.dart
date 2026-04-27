@@ -7,14 +7,14 @@ import "package:flutter_stripe_web/flutter_stripe_web.dart";
 import "package:http/http.dart" as http;
 import "package:web/web.dart" as web;
 
-class CheckoutScreenWeb extends StatefulWidget {
-  const CheckoutScreenWeb({super.key});
+class CheckoutScreen extends StatefulWidget {
+  const CheckoutScreen({super.key});
 
   @override
-  State<CheckoutScreenWeb> createState() => _CheckoutScreenWebState();
+  State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
-class _CheckoutScreenWebState extends State<CheckoutScreenWeb> {
+class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _clientSecret;
   String? _error;
 

@@ -1,8 +1,9 @@
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_stripe/flutter_stripe.dart";
 
-import "checkout_web.dart";
+import "checkout.dart";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,8 +24,16 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: CheckoutScreenWeb(),
+    return MaterialApp(
+      home: kIsWeb
+          ? const CheckoutScreen()
+          : switch (defaultTargetPlatform) {
+              .android => const CheckoutScreen(),
+              .iOS => const CheckoutScreen(),
+              final platform => throw UnsupportedError(
+                "we do not support $platform yet",
+              ),
+            },
     );
   }
 }
