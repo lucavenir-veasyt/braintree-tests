@@ -14,6 +14,49 @@ end
 Stripe.api_key = ENV.fetch('STRIPE_SECRET_KEY')
 WEBHOOK_SECRET = ENV.fetch('STRIPE_WEBHOOK_SECRET')
 
+# in-memory session status store: session_id -> "pending" | "paid"
+SESSION_STATUS = {}
+
+post '/api/stripe/checkout' do
+  body = JSON.parse(request.body.read)
+  amount = body['amount']
+  base_url = ENV.fetch('APP_BASE_URL', 'http://localhost:4000')
+
+  session = Stripe::Checkout::Session.create(
+    mode: 'payment',
+    payment_method_types: ['card'],
+    line_items: [{
+      price_data: {
+        currency: 'eur',
+        unit_amount: amount,
+        product_data: { name: 'payment' }
+      },
+      quantity: 1
+    }],
+    success_url: "#{base_url}/payment/success",
+    cancel_url: "#{base_url}/payment/cancel"
+  )
+
+  SESSION_STATUS[session.id] = 'pending'
+
+  json url: session.url, session_id: session.id
+end
+
+get '/api/stripe/payment_status/:session_id' do
+  session_id = params[:session_id]
+  json status: SESSION_STATUS[session_id] || 'pending'
+end
+
+get '/payment/success' do
+  content_type :html
+  '<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>Payment complete ✓</h2><p>You can close this window.</p></body></html>'
+end
+
+get '/payment/cancel' do
+  content_type :html
+  '<html><body style="font-family:sans-serif;text-align:center;padding:60px"><h2>Payment cancelled</h2><p>You can close this window.</p></body></html>'
+end
+
 post '/api/stripe/payment' do
   body = JSON.parse(request.body.read)
   amount = body['amount']
@@ -49,6 +92,10 @@ post '/api/webhooks/stripe' do
     pi = event.data.object
     user_id = pi.metadata['user_id']
     puts "Payment confirmed: #{pi.id}, user: #{user_id}, amount: #{pi.amount} #{pi.currency}"
+  when 'checkout.session.completed'
+    cs = event.data.object
+    SESSION_STATUS[cs.id] = 'paid'
+    puts "Checkout session paid: #{cs.id}"
   end
 
   status 200
