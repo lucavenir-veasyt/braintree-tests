@@ -6,15 +6,15 @@ import "package:flutter/material.dart";
 import "package:flutter_stripe/flutter_stripe.dart";
 import "package:http/http.dart" as http;
 
-class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+class CheckoutMobile extends StatefulWidget {
+  const CheckoutMobile({super.key});
 
   @override
-  State<CheckoutScreen> createState() => _CheckoutScreenState();
+  State<CheckoutMobile> createState() => _CheckoutMobileState();
 }
 
-class _CheckoutScreenState extends State<CheckoutScreen> {
-  Future<void> handlePayment(BuildContext context) async {
+class _CheckoutMobileState extends State<CheckoutMobile> {
+  Future<void> handlePayment() async {
     try {
       final url = Uri.parse("http://192.168.1.137:4000/api/stripe/payment");
       final response = await http.post(
@@ -37,10 +37,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       await Stripe.instance.presentPaymentSheet();
       log("payment sheet presented");
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("payment successfully completed on the device!"),
+          content: Text("pagamento completato con successo sul dispositivo!"),
         ),
       );
     } on StripeException catch (e) {
@@ -71,7 +71,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       appBar: AppBar(title: const Text("Stripe Sandbox")),
       body: Center(
         child: ElevatedButton(
-          onPressed: () => handlePayment(context),
+          onPressed: handlePayment,
           child: const Text("sgancia €10"),
         ),
       ),
