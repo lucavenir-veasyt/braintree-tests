@@ -17,12 +17,16 @@ WEBHOOK_SECRET = ENV.fetch('STRIPE_WEBHOOK_SECRET')
 post '/api/stripe/payment' do
   body = JSON.parse(request.body.read)
   amount = body['amount']
+  user_id = "pippo franco"
 
   intent = Stripe::PaymentIntent.create(
     amount: amount,
     currency: 'eur',
-    payment_method_types: ['card']
+    payment_method_types: ['card'],
+    metadata: { user_id: user_id }
   )
+
+  puts intent
 
   json client_secret: intent.client_secret
 end
@@ -38,10 +42,13 @@ post '/api/webhooks/stripe' do
     payload, sig_header, WEBHOOK_SECRET
   )
 
+  puts event
+
   case event.type
   when 'payment_intent.succeeded'
     pi = event.data.object
-    puts "Payment confirmed: #{pi.id}, amount: #{pi.amount} #{pi.currency}"
+    user_id = pi.metadata['user_id']
+    puts "Payment confirmed: #{pi.id}, user: #{user_id}, amount: #{pi.amount} #{pi.currency}"
   end
 
   status 200
