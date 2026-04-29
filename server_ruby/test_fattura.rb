@@ -1,4 +1,5 @@
 require_relative 'fattura_client'
+require_relative 'invoice_pdf'
 
 FakePI = Struct.new(:id, :amount, :currency, :metadata)
 
@@ -31,7 +32,28 @@ if (xml = result['sdi_fattura']) && !xml.empty?
   puts "XML saved to:       #{result['sdi_nome_file']}"
 end
 
-pdf = client.fetch_pdf(result['id'])
-pdf_filename = result['sdi_nome_file'].sub('.xml', '.pdf')
-File.binwrite(pdf_filename, pdf)
-puts "PDF saved to:       #{pdf_filename}"
+m = fake_pi.metadata
+local_pdf = InvoicePdf.generate(
+  numero:  result['id'],
+  data:    Date.today.to_s,
+  cliente: {
+    nome:            m['nome'],
+    cognome:         m['cognome'],
+    codice_fiscale:  m['codice_fiscale'],
+    indirizzo:       m['indirizzo'],
+    cap:             m['cap'],
+    comune:          m['comune'],
+    provincia:       m['provincia'],
+    nazione:         m['nazione']
+  },
+  righe: [{
+    descrizione: 'credito VEASYT',
+    quantita:    1,
+    prezzo:      fake_pi.amount / 100.0,
+    iva:         22
+  }]
+)
+
+local_pdf_filename = result['sdi_nome_file'].sub('.xml', '_local.pdf')
+File.binwrite(local_pdf_filename, local_pdf)
+puts "Local PDF saved to: #{local_pdf_filename}"
