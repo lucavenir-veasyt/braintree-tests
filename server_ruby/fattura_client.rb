@@ -49,7 +49,9 @@ class FatturaClient
     uri = URI("#{BASE_URL}/fatture")
     req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json', 'Authorization' => "Bearer #{bearer_token}")
     req.body = payload.to_json
-    JSON.parse(http(uri).request(req).body)
+    response = http(uri).request(req)
+    raise "FatturaClient send_invoice failed: #{response.code} #{response.body}" unless response.is_a?(Net::HTTPSuccess)
+    JSON.parse(response.body)
   end
 
   def bearer_token
