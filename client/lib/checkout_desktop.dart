@@ -4,15 +4,14 @@ import "dart:developer";
 
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
-import "package:time/time.dart";
-import "package:url_launcher/url_launcher.dart";
+import "package:webview_flutter/webview_flutter.dart";
 
 const _baseUrl = String.fromEnvironment(
   "BASE_URL",
   defaultValue: "http://localhost:4000",
 );
 
-enum _PaymentState { idle, launching, polling, paid, cancelled, error }
+enum _PaymentState { idle, loading, paid, cancelled, error }
 
 class CheckoutDesktop extends StatefulWidget {
   const CheckoutDesktop({super.key});
@@ -22,24 +21,11 @@ class CheckoutDesktop extends StatefulWidget {
 }
 
 class _CheckoutDesktopState extends State<CheckoutDesktop> {
-  _PaymentState _state = _PaymentState.idle;
-  Timer? pollTimer;
-  Timer? timeoutTimer;
-
-  @override
-  void dispose() {
-    cancelTimers();
-    super.dispose();
-  }
-
-  void cancelTimers() {
-    pollTimer?.cancel();
-    timeoutTimer?.cancel();
-  }
+  _PaymentState _state = .idle;
 
   Future<void> handlePayment() async {
     setState(() {
-      _state = .launching;
+      _state = .loading;
     });
 
     try {
@@ -50,30 +36,35 @@ class _CheckoutDesktopState extends State<CheckoutDesktop> {
       );
 
       if (response.statusCode != 200) {
-        throw Exception("""
-Server error (${response.statusCode})
-${response.body}
-""");
+        throw Exception(
+          "Server error (${response.statusCode})\n${response.body}",
+        );
       }
 
       final body = json.decode(response.body) as Map<String, Object?>;
       final url = body["url"] as String?;
-      final sessionId = body["session_id"] as String?;
 
-      if (url == null || sessionId == null) {
-        throw Exception("""
-Invalid server response: url is $url and session_id is $sessionId
-Response body: ${response.body}
-""");
+      if (url == null) {
+        throw Exception(
+          "Invalid server response: missing url\n${response.body}",
+        );
       }
 
-      log("Opening checkout URL for session: $sessionId");
-      await launchUrl(Uri.parse(url), mode: .externalApplication);
+      log("Opening checkout URL: $url");
+      if (!mounted) return;
 
+      final paid = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (context) {
+            return _CheckoutWebView(checkoutUrl: url);
+          },
+        ),
+      );
+
+      if (!mounted) return;
       setState(() {
-        _state = .polling;
+        _state = paid == true ? .paid : .cancelled;
       });
-      startPolling(sessionId);
     } on Exception catch (e) {
       log("Checkout error: $e");
       if (!mounted) return;
@@ -83,44 +74,10 @@ Response body: ${response.body}
     }
   }
 
-  void startPolling(String sessionId) {
-    // Timeout after 10 minutes
-    timeoutTimer = .new(10.minutes, () {
-      cancelTimers();
-      if (!mounted) return;
-      setState(() {
-        _state = .cancelled;
-      });
-    });
-
-    pollTimer = .periodic(3.seconds, (timer) async {
-      try {
-        final response = await http.get(
-          Uri.parse("$_baseUrl/api/stripe/payment_status/$sessionId"),
-        );
-
-        if (response.statusCode != 200) return;
-
-        final body = json.decode(response.body) as Map<String, Object?>;
-        final status = body["status"] as String?;
-
-        log("poll status for $sessionId: $status");
-
-        if (status != "paid") return;
-        cancelTimers();
-        if (!mounted) return;
-        setState(() {
-          _state = .paid;
-        });
-      } on Exception catch (e) {
-        log("Poll error: $e");
-      }
-    });
-  }
-
   void reset() {
-    cancelTimers();
-    setState(() => _state = .idle);
+    setState(() {
+      _state = .idle;
+    });
   }
 
   @override
@@ -133,22 +90,7 @@ Response body: ${response.body}
             onPressed: handlePayment,
             child: const Text("sgancia €10"),
           ),
-          .launching => const Column(
-            mainAxisSize: .min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text("apro il browser..."),
-            ],
-          ),
-          .polling => const Column(
-            mainAxisSize: .min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text("in attesa della conferma del pagamento..."),
-            ],
-          ),
+          .loading => const CircularProgressIndicator(),
           .paid => Column(
             mainAxisSize: .min,
             children: [
@@ -190,6 +132,67 @@ Response body: ${response.body}
           ),
         },
       ),
+    );
+  }
+}
+
+class _CheckoutWebView extends StatefulWidget {
+  const _CheckoutWebView({required this.checkoutUrl});
+
+  final String checkoutUrl;
+
+  @override
+  State<_CheckoutWebView> createState() => _CheckoutWebViewState();
+}
+
+class _CheckoutWebViewState extends State<_CheckoutWebView> {
+  late final WebViewController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = WebViewController();
+    unawaited(setupWebView());
+  }
+
+  Future<void> setupWebView() async {
+    await controller.setNavigationDelegate(
+      .new(
+        onNavigationRequest: (request) {
+          if (!mounted) return .prevent;
+          if (request.url.startsWith("$_baseUrl/payment/success")) {
+            Navigator.of(context).pop(true);
+            return .prevent;
+          }
+          if (request.url.startsWith("$_baseUrl/payment/cancel")) {
+            Navigator.of(context).pop(false);
+            return .prevent;
+          }
+          return .navigate;
+        },
+      ),
+    );
+    await controller.loadRequest(
+      .parse(widget.checkoutUrl),
+    );
+  }
+
+  @override
+  void dispose() {
+    unawaited(cleanup());
+    super.dispose();
+  }
+
+  Future<void> cleanup() async {
+    await controller.clearCache();
+    await controller.clearLocalStorage();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Pagamento")),
+      body: WebViewWidget(controller: controller),
     );
   }
 }

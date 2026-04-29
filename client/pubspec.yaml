@@ -46,6 +46,7 @@ dependencies:
   url_launcher: ^6.3.2
   very_good_analysis: ^10.2.0
   web: ^1.1.1
+  webview_flutter: ^4.10.0
 
 dev_dependencies:
   flutter_test:
