@@ -25,7 +25,6 @@ post '/api/stripe/checkout' do
 
   session = Stripe::Checkout::Session.create(
     mode: 'payment',
-    payment_method_types: ['card'],
     line_items: [{
       price_data: {
         currency: 'eur',
@@ -57,8 +56,10 @@ post '/api/stripe/payment' do
 
   intent = Stripe::PaymentIntent.create(
     amount: amount,
+    automatic_payment_methods: {
+      enabled: true
+    },
     currency: 'eur',
-    payment_method_types: ['card'],
     metadata: {
       codice_fiscale: body['codice_fiscale'],
       nome:           body['nome'],
